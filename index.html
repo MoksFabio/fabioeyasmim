@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Para Yasmim & Fábio 💖</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CONFIGURAÇÕES GLOBAIS E VARIÁVEIS --- */
+        :root {
+            --spotify-black: #121212;
+            --spotify-gray-dark: #1f1f1f; /* Um pouco mais claro para contraste */
+            --spotify-gray-light: #b3b3b3;
+            --spotify-white: #ffffff;
+            --love-accent: #E84A5F; /* Cor do amor, substitui o verde */
+            --love-accent-dark: #b83247;
+            --font-family-sans: 'Montserrat', sans-serif;
+            --font-family-cursive: 'Caveat', cursive;
+            --dominant-color-rgb: 85, 85, 85; /* Cor de fallback */
+            --player-height: 75px; /* Aumentado para a barra de progresso */
+            --nav-height: 70px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { height: -webkit-fill-available; }
+
+        body {
+            background-color: #000;
+            color: var(--spotify-white);
+            font-family: var(--font-family-sans);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* --- CONTAINER PRINCIPAL E EFEITO DE CORAÇÕES --- */
+        .spotify-container {
+            width: 100%;
+            max-width: 500px; 
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background-color: var(--spotify-black);
+        }
+
+        .heart-particle {
+            position: absolute;
+            color: var(--love-accent);
+            font-size: 1rem;
+            animation: floatUp 5s infinite linear;
+            opacity: 0;
+            text-shadow: 0 0 10px var(--love-accent);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        @media (min-width: 451px) {
+            body { padding: 1rem 0; }
+            .spotify-container {
+                height: 90vh;
+                max-height: 950px;
+                border-radius: 20px;
+                box-shadow: 0 10px 60px rgba(0,0,0,0.8);
+            }
+        }
+        
+        /* --- TELA DE BOAS-VINDAS --- */
+        .welcome-overlay {
+            position: absolute; inset: 0;
+            background-color: var(--spotify-black);
+            z-index: 999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1s ease-in-out 1s; /* Atraso para a mensagem aparecer */
+        }
+        .welcome-content {
+            text-align: center;
+        }
+        .welcome-overlay .fa-heart {
+            font-size: 5rem; color: var(--love-accent);
+            animation: heartbeat 1.5s infinite ease-in-out;
+            margin-bottom: 1.5rem;
+        }
+        .welcome-text {
+            font-family: var(--font-family-cursive);
+            font-size: 2.2rem;
+            color: var(--spotify-white);
+            opacity: 0;
+            animation: fadeInText 1.5s ease-in-out 0.5s forwards;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes fadeInText {
+            to { opacity: 1; }
+        }
+
+
+        /* --- ESTRUTURA DE PÁGINAS --- */
+        .page {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            display: none;
+            flex-direction: column;
+            background-color: var(--spotify-black);
+            padding-bottom: calc(var(--nav-height) + var(--player-height));
+        }
+        .page.active { display: flex; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .main-view {
+            flex-grow: 1; overflow-y: auto; padding: 1.5rem 1rem;
+        }
+        .main-view::-webkit-scrollbar { display: none; }
+
+        .section { margin-bottom: 2.5rem; }
+        .section-title { font-family: var(--font-family-cursive); font-size: 2rem; margin-bottom: 1.2rem; }
+
+        /* --- TELA INICIAL (HOME) --- */
+        .home-screen .header-title {
+              font-family: var(--font-family-cursive);
+              font-size: 2.5rem;
+              font-weight: 700;
+              padding: 1.5rem 0;
+              text-align: center;
+        }
+        .shortcuts-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem;
+        }
+        .shortcut-item {
+            background-color: var(--spotify-gray-dark); border-radius: 6px; display: flex;
+            align-items: center; overflow: hidden; text-decoration: none; color: var(--spotify-white);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .shortcut-item:hover { background-color: #333; transform: scale(1.03); }
+        .shortcut-item img { width: 55px; height: 55px; object-fit: cover; flex-shrink: 0; }
+        .shortcut-item span { padding: 0.8rem; font-size: 0.8rem; font-weight: 700; }
+
+        .carousel { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 1rem; }
+        .carousel::-webkit-scrollbar { display: none; }
+        .card { flex-shrink: 0; width: 150px; text-decoration: none; color: var(--spotify-white); transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem; }
+        .card .card-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
+        .card .card-subtitle { font-size: 0.8rem; color: var(--spotify-gray-light); }
+        .message-card {
+            background: linear-gradient(135deg, var(--love-accent) 0%, var(--love-accent-dark) 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 150px; border-radius: 8px; padding: 1rem; text-align: center;
+        }
+        .message-card i { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        
+        /* --- TELA DA PLAYLIST --- */
+        .main-view-playlist { flex-grow: 1; overflow-y: auto; padding: 0 0 4rem 0; }
+        .sticky-top-bar {
+            position: absolute; top: 0; left: 0; right: 0; padding: 1rem; z-index: 50;
+            display: flex; align-items: center; gap: 1rem; transition: background-color 0.3s ease;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(var(--dominant-color-rgb), 0);
+        }
+        .back-arrow { color: var(--spotify-white); font-size: 1.2rem; text-decoration: none; }
+        .playlist-title-sticky { font-weight: 700; opacity: 0; transition: opacity 0.3s ease; }
+        .playlist-header {
+            text-align: center; padding: 6rem 1rem 1.5rem 1rem; position: relative;
+            background: linear-gradient(to bottom, rgb(var(--dominant-color-rgb)) 0%, var(--spotify-black) 100%);
+        }
+        #playlist-cover {
+            width: 200px; height: 200px; object-fit: cover; border-radius: 8px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.6); margin-bottom: 1rem;
+            transition: transform 0.3s ease-out;
+        }
+        .playlist-title-main { font-size: 2rem; margin-bottom: 0.5rem; transition: opacity 0.3s ease; }
+        .playlist-description { font-size: 0.9rem; color: var(--spotify-gray-light); margin-bottom: 0.5rem; }
+        .playlist-author { font-size: 0.8rem; }
+        .playlist-author strong { color: var(--spotify-white); }
+        .playlist-controls { display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; }
+        .play-button-large {
+            width: 60px; height: 60px; background-color: var(--love-accent);
+            border: none; border-radius: 50%; color: var(--spotify-white); font-size: 1.8rem;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 20px rgba(232, 74, 95, 0.5); cursor: pointer; transition: transform 0.2s ease;
+        }
+        .play-button-large:hover { transform: scale(1.05); }
+        #pause-icon { display: none; }
+        
+        .control-icon { 
+            font-size: 1.8rem; 
+            color: var(--spotify-gray-light); 
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .control-icon:hover { color: var(--spotify-white); }
+        .control-icon.liked { color: var(--love-accent); }
+        .control-icon.more-options { margin-left: auto; }
+        
+        .declaration-section { padding: 0 1.5rem 1.5rem 1.5rem; }
+        .declaration-section h2 {
+            font-family: var(--font-family-cursive); font-size: 1.8rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .declaration-section p { color: var(--spotify-gray-light); line-height: 1.6; margin-bottom: 1rem; }
+        .declaration-section .highlight { color: var(--spotify-white); font-style: italic; font-weight: 700; }
+        
+        /* --- TELA "NOSSA LINHA DO TEMPO" --- */
+        .timeline-header {
+            font-family: var(--font-family-cursive); font-size: 2.5rem; padding: 1.5rem 0; text-align: center;
+        }
+        .timeline { position: relative; padding: 2rem 0; margin: 0 1.5rem; }
+        .timeline::before {
+            content: ''; position: absolute; left: 20px; top: 0; bottom: 0;
+            width: 3px; background-color: var(--spotify-gray-dark);
+        }
+        .timeline-item { position: relative; margin-bottom: 2.5rem; padding-left: 50px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot {
+            position: absolute; left: 9px; top: 0; width: 25px; height: 25px;
+            border-radius: 50%; background-color: var(--spotify-black);
+            border: 3px solid var(--love-accent);
+        }
+        .timeline-date { font-weight: 700; color: var(--spotify-gray-light); margin-bottom: 0.5rem; }
+        .timeline-content h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .timeline-content p { color: var(--spotify-white); line-height: 1.6; }
+        .timeline-content img { width: 100%; border-radius: 8px; margin-top: 1rem; }
+
+        /* --- TELA "10 COISAS QUE AMO" (COM FLIP CARD) --- */
+         .reasons-header {
+            font-family: var(--font-family-cursive); font-size: 2.2rem; text-align: center; padding: 1.5rem; line-height: 1.2;
+        }
+        .reasons-grid {
+            display: grid; grid-template-columns: 1fr; gap: 1rem; padding: 0 1.5rem 1.5rem;
+            perspective: 1000px;
+        }
+        .reason-card {
+            background-color: transparent;
+            height: 120px;
+            border: none;
+            cursor: pointer;
+        }
+        .reason-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: left;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .reason-card:hover .reason-card-inner {
+            transform: rotateY(180deg);
+        }
+        .reason-card-front, .reason-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        .reason-card-front {
+            background-color: var(--spotify-gray-dark);
+            border-left: 4px solid var(--love-accent);
+        }
+        .reason-card-front strong {
+            font-size: 1.1rem; color: var(--spotify-white);
+        }
+         .reason-card-front i {
+            margin-left: auto; color: var(--spotify-gray-light); font-size: 0.8rem;
+        }
+        .reason-card-back {
+            background: linear-gradient(135deg, var(--love-accent) 0%, var(--love-accent-dark) 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+        .reason-card-back span {
+            color: var(--spotify-white); line-height: 1.5; font-weight: 500;
+        }
+
+        /* --- OVERLAY DE MENSAGEM --- */
+        .message-overlay {
+            position: absolute; inset: 0; background-color: rgba(0,0,0,0.9);
+            backdrop-filter: blur(5px); z-index: 200; display: none;
+            justify-content: center; align-items: center; padding: 1.5rem; animation: fadeIn 0.3s ease;
+        }
+        .message-overlay.active { display: flex; }
+        .message-content {
+            background-color: var(--spotify-gray-dark); border-radius: 12px; padding: 2rem;
+            max-width: 95%; max-height: 90vh; overflow-y: auto; position: relative;
+            animation: fadeInScaleUp 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        @keyframes fadeInScaleUp { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .message-close-btn {
+            position: absolute; top: 1rem; right: 1rem; background: none; border: none;
+            color: var(--spotify-gray-light); font-size: 1.5rem; cursor: pointer;
+        }
+        .message-content h2 {
+            font-family: var(--font-family-cursive); font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 0.7rem; color: var(--love-accent);
+        }
+        .message-content p { color: var(--spotify-gray-light); line-height: 1.7; margin-bottom: 1.2rem; font-size: 0.95rem; }
+        .message-content strong { color: var(--spotify-white); font-weight: 700; }
+        .message-content .empower {
+            background-color: rgba(232, 74, 95, 0.1);
+            border-left: 3px solid var(--love-accent); padding: 1rem;
+            margin: 1.5rem 0; border-radius: 4px; font-weight: 700;
+            color: var(--spotify-white); font-style: italic;
+        }
+
+        /* --- PLAYER PERSISTENTE (COM BARRA DE PROGRESSO) --- */
+        #now-playing-bar {
+            position: absolute;
+            bottom: var(--nav-height); left: 0; right: 0;
+            height: var(--player-height);
+            background-color: #1a1a1a;
+            border-top: 1px solid #282828;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 150;
+            transform: translateY(100%);
+            transition: transform 0.4s ease-out;
+            padding: 0.5rem 1rem;
+        }
+        #now-playing-bar.visible {
+            display: flex;
+            transform: translateY(0);
+        }
+        .player-content { display: flex; align-items: center; gap: 1rem; width: 100%; }
+        #now-playing-cover { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; }
+        #now-playing-info { flex-grow: 1; overflow: hidden; }
+        #now-playing-info strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #now-playing-info span { font-size: 0.8rem; color: var(--spotify-gray-light); }
+        
+        #now-playing-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        #now-playing-controls button {
+            background: none; border: none; color: var(--spotify-white); font-size: 1.3rem; cursor: pointer;
+            transition: color 0.2s;
+        }
+        #now-playing-controls button:hover {
+            color: var(--love-accent);
+        }
+        
+        #progress-container {
+            width: 100%; height: 4px; background-color: #404040;
+            border-radius: 2px; margin-top: 8px; cursor: pointer;
+        }
+        #progress-bar {
+            width: 0; height: 100%; background-color: var(--spotify-white); border-radius: 2px;
+        }
+        #progress-container:hover #progress-bar { background-color: var(--love-accent); }
+        
+        /* --- BARRA DE NAVEGAÇÃO --- */
+        .nav-bar {
+            position: absolute; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: linear-gradient(to top, rgba(18,18,18,1) 70%, rgba(18,18,18,0));
+            height: var(--nav-height); display: flex; justify-content: space-around; align-items: center;
+            padding-top: 10px;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+            color: var(--spotify-gray-light); font-size: 0.7rem; font-weight: 700;
+            text-decoration: none; transition: color 0.2s; cursor: pointer;
+        }
+        .nav-item i { font-size: 1.5rem; }
+        .nav-item.active, .nav-item:hover { color: var(--spotify-white); }
+    </style>
+</head>
+<body>
+
+    <div class="spotify-container">
+        <audio id="music-player" preload="metadata"></audio>
+
+        <div id="welcome-overlay" class="welcome-overlay">
+            <div class="welcome-content">
+                <i class="fas fa-heart"></i>
+                <h1 class="welcome-text">Feliz Dia dos Namorados, meu amor!</h1>
+            </div>
+        </div>
+
+        <div id="home-screen" class="page active">
+            <main class="main-view">
+                <header class="home-screen">
+                    <h1 class="header-title">Para o meu Momôzinho ❤️</h1>
+                </header>
+                <div class="shortcuts-grid">
+                    <a href="#" id="go-to-playlist" class="shortcut-item" role="button">
+                        <img src="Yasmim 1.jpg" alt="Capa da Playlist">
+                        <span>Nossa Trilha Sonora</span>
+                    </a>
+                    <a href="#" id="go-to-reasons" class="shortcut-item" role="button">
+                        <img src="Yasmim 2.jpg" alt="Foto do casal">
+                        <span>10 Coisas Que Amo</span>
+                    </a>
+                </div>
+                
+                <section class="section">
+                    <h2 class="section-title">Nossas Memórias</h2>
+                    <div class="carousel">
+                        <a href="#" id="open-message-card" class="card message-card" role="button">
+                            <i class="fas fa-microphone-alt"></i>
+                            <div class="card-title">Uma Mensagem Para Você</div>
+                            <div class="card-subtitle">Do seu porto seguro</div>
+                        </a>
+                        <a href="#" id="go-to-story" class="card" role="button">
+                            <img src="Yasmim 3.jpg" alt="Foto do casal">
+                            <div class="card-title">Nossa Linha do Tempo</div>
+                            <div class="card-subtitle">O começo de tudo...</div>
+                        </a>
+                        <a href="#" class="card" role="button">
+                            <img src="Yasmim 4.jpg" alt="Foto do casal">
+                            <div class="card-title">Aquele Sorriso</div>
+                            <div class="card-subtitle">Que ilumina meus dias</div>
+                        </a>
+                        <a href="#" class="card" role="button">
+                            <img src="Yasmim 5.jpg" alt="Foto do casal">
+                            <div class="card-title">Nossos Rolês</div>
+                            <div class="card-subtitle">Cada momento especial</div>
+                        </a>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <div id="playlist-screen" class="page">
+             <div class="sticky-top-bar">
+                  <a href="Yasmim 1.jpg" class="back-arrow" role="button" aria-label="Voltar"><i class="fas fa-arrow-left"></i></a>
+                  <span id="playlist-title-sticky" class="playlist-title-sticky">Nossa Trilha Sonora</span>
+             </div>
+             <main class="main-view-playlist">
+                  <header class="playlist-header">
+                        <h1 id="playlist-title-main" class="playlist-title-main">Nossa Trilha Sonora</h1>
+                        <p id="playlist-description" class="playlist-description">Com amor, para a mulher que transformou minha vida.</p>
+                        <p class="playlist-author"><strong>Olhos nos Olhos</strong> • 6 Músicas do Coração</p>
+                  </header>
+                  <div class="playlist-controls">
+                        <i id="prev-btn" class="fas fa-step-backward control-icon" aria-label="Música anterior"></i>
+                        <button id="play-pause-btn" class="play-button-large" aria-label="Tocar a playlist">
+                              <i id="play-icon" class="fas fa-play"></i><i id="pause-icon" class="fas fa-pause"></i>
+                        </button>
+                        <i id="next-btn" class="fas fa-step-forward control-icon" aria-label="Próxima música"></i>
+                        <i class="fas fa-heart control-icon liked" aria-label="Curitdo"></i>
+                        <i class="fas fa-ellipsis-h control-icon more-options" aria-label="Mais opções"></i>
+                  </div>
+                  <section class="declaration-section">
+                        <h2><i class="fas fa-pen-fancy"></i> Binho diz isso para ti...</h2>
+                        <p>Meu amor, hoje o mundo celebra o amor, mas para mim, cada dia ao seu lado já é uma celebração. Desde aquela mensagem de um mês, nossa história ganhou novos capítulos, e a nossa trilha sonora, novas canções. E que sorte a minha viver tudo isso com você.</p>
+                        <p class="highlight">Neste nosso primeiro Dia dos Namorados juntos, eu só quero que você saiba que o meu amor por você cresce a cada amanhecer. Você é meu presente, meu futuro e a história que eu mais amo contar. Feliz Dia dos Namorados para nós. Eu te amo infinitamente.</p>
+                  </section>
+             </main>
+        </div>
+
+        <div id="story-screen" class="page">
+            <main class="main-view">
+                <header>
+                    <h1 class="timeline-header">Nossa Linha do Tempo</h1>
+                </header>
+                <div id="timeline-container" class="timeline"></div>
+            </main>
+        </div>
+
+        <div id="reasons-screen" class="page">
+            <main class="main-view">
+                <header>
+                    <h1 class="reasons-header">10 Coisas (entre infinitas) Que Amo em Você</h1>
+                </header>
+                <div id="reasons-container" class="reasons-grid"></div>
+            </main>
+        </div>
+
+        <div id="now-playing-bar">
+            <div class="player-content">
+                <img id="now-playing-cover" src="" alt="Capa da música atual">
+                <div id="now-playing-info">
+                    <strong id="now-playing-title"></strong>
+                    <span id="now-playing-artist"></span>
+                </div>
+                <div id="now-playing-controls">
+                    <button id="now-playing-prev" aria-label="Música anterior"><i class="fas fa-step-backward"></i></button>
+                    <button id="now-playing-play-pause" aria-label="Tocar ou pausar música">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button id="now-playing-next" aria-label="Próxima música"><i class="fas fa-step-forward"></i></button>
+                </div>
+            </div>
+            <div id="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+        
+        <nav class="nav-bar">
+            <a href="#" id="nav-home" class="nav-item active" role="button"><i class="fas fa-home"></i><span>Início</span></a>
+            <a href="#" id="nav-playlist" class="nav-item" role="button"><i class="fas fa-music"></i><span>Canções</span></a>
+            <a href="#" id="nav-story" class="nav-item" role="button"><i class="fas fa-book"></i><span>Nossa História</span></a>
+        </nav>
+
+        <div id="message-overlay" class="message-overlay">
+             <div class="message-content">
+                  <button id="message-close-btn" class="message-close-btn" aria-label="Fechar mensagem">&times;</button>
+                  <h2><i class="fas fa-shield-alt"></i> Do seu porto seguro...</h2>
+                  <p>Meu amor, eu sei que os dias têm sido pesados. Vejo a sua luta, a pressão das provas, o peso do mundo que você coloca nos seus ombros. E o meu coração aperta sempre que ouço a sua voz fraquejar, sempre que você se frustra e se coloca para baixo.</p>
+                  <p>Por isso, eu preciso que você pare um instante e me ouça. Quando a sua mente, cansada, te prega uma partida e te diz que você "é um lixo" ou "não serve para nada", <strong>ela está a mentir</strong>. E eu estou aqui para ser a voz da verdade.</p>
+                  <p>A verdade é a força que eu vejo em você todos os dias, uma força que você mesma, por vezes, não enxerga. A verdade é a sua inteligência afiada, a sua capacidade de mergulhar em mundos e assuntos que te apaixonam. A verdade é o seu coração gigante, que cuida, que sente, que ama com uma intensidade que me inspira.</p>
+                  <p class="empower">Essas provas, essa frustração... não definem o seu valor. São apenas pedras no caminho de uma mulher brilhante que está a construir o seu futuro. E toda construção tem dias de poeira e barulho.</p>
+                  <p>Você nunca será "um lixo". Você é a pessoa que transformou a minha vida. Você é a calmaria e a aventura. Você é a minha paz. E se em algum momento duvidar disso, olhe para mim. <strong>Eu sou a prova viva do quão incrível você é, porque alguém como eu jamais se contentaria com menos que o universo inteiro. E o meu universo é você.</strong></p>
+                  <p>Eu te amo. E estou aqui. Sempre.</p>
+             </div>
+        </div>
+
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- BANCOS DE DADOS ---
+    const DB = {
+        music: [
+            { title: 'Caso Sério', artist: 'Rita Lee', file: 'Caso Sério - Rita Lee.mp3', cover: 'Rita Lee.jpeg' },
+            { title: 'Todo Sujo de Batom', artist: 'Belchior', file: 'Todo Sujo de Batom - Belchior.mp3', cover: 'Belchior.jpg' },
+            { title: 'N', artist: 'Nando Reis', file: 'N - Nando Reis.mp3', cover: 'Nando Reis.jpeg' },
+            { title: 'Eternamente', artist: 'Gal Costa', file: 'Eternamente - Gal Costa.mp3', cover: 'Gal costa.jpg' },
+            { title: 'Drão', artist: 'Gilberto Gil', file: 'Drão - Gilberto Gil.mp3', cover: 'Gilberto Gil.jpeg' },
+            { title: 'Amor Meu Grande Amor', artist: 'Angela Ro Ro', file: 'Amor Meu Grande Amor - Angela Ro Ro.mp3', cover: 'Angela Ro Ro.jpg' }
+        ],
+        story: [
+            { date: 'Nosso Primeiro "Oi"', title: 'Onde Tudo Começou', text: 'Uma simples conversa que mudaria tudo. Lembro de cada palavra e do quanto seu jeito me encantou desde o primeiro instante.', image: 'Yasmim 3.jpg' },
+            { date: 'Aquele Dia Especial', title: 'O Primeiro Encontro', text: 'O nervosismo, a expectativa e a certeza de que algo incrível estava acontecendo. Foi melhor do que eu poderia imaginar.', image: 'Yasmim 4.jpg' },
+            { date: 'Hoje e Sempre', title: 'Construindo o Futuro', text: 'Cada dia ao seu lado é um presente. Olhar para o futuro e ver você nele é a minha maior alegria e motivação.', image: 'Yasmim 5.jpg' },
+            { date: 'Nossa Sorte', title: 'Meu Melhor Sorriso', text: 'Ter você para compartilhar a vida é o meu maior presente. Que a gente continue colecionando momentos e construindo nossos sonhos.', image: 'Yasmim.jpg' },
+            { date: 'Um Olhar Cúmplice', title: 'Nossa Conexão', text: 'Adoro como nos entendemos sem precisar de palavras. Cada olhar, cada sorriso, tudo se conecta de uma forma única e especial.', image: 'Yasmim 9.JPG' },
+            { date: 'Momentos Leves', title: 'Alegria Contagiante', text: 'Seu sorriso ilumina tudo à volta. Estar com você é ter a certeza de momentos felizes e de uma leveza que eu adoro.', image: 'Yasmim 10.JPG' },
+            { date: 'Apoio e Carinho', title: 'Meu Porto Seguro', text: 'Nos dias difíceis e nos dias felizes, você é meu apoio, minha força. Saber que tenho você ao meu lado faz toda a diferença.', image: 'Yasmim 11.JPG' },
+            { date: 'Sempre Juntos', title: 'O Futuro é Nosso', text: 'Cada nova foto é mais uma página da nossa história. Mal posso esperar por todas as aventuras que ainda vamos viver. Te amo!', image: 'Yasmim 12.jpg' }
+        ],
+        reasons: [
+            { title: 'Sua Confiabilidade', text: 'Saber que posso contar com você é meu porto seguro.'},
+            { title: 'Nossos Momentos de Silêncio', text: 'Sua presença preenche tudo, mesmo sem palavras.'},
+            { title: 'Nossas Memórias', text: 'Adoro relembrar cada passo que demos juntos.'},
+            { title: 'Sua Sinceridade', text: 'Amo sua capacidade de ser você mesma, sem filtros.'},
+            { title: 'Sua Autenticidade', text: 'Você não tem medo de ser quem é, e isso me inspira.'},
+            { title: 'Seu Amor Recíproco', text: 'Cada "Binho, eu amo você" aquece minha alma.'},
+            { title: 'Sua Voz', text: 'A melodia que acalma minha mente e minha alma.'},
+            { title: 'Sua Alma', text: 'A sua essência é a coisa mais linda que já conheci.'},
+            { title: 'A Admiração em Seus Olhos', text: 'Saiba que a minha admiração por você é ainda maior.'},
+            { title: 'O Quanto Você é Incrível', text: 'Você significa o mundo para mim.'},
+        ]
+    };
+
+    // --- ESTADO DA APLICAÇÃO ---
+    const state = {
+        currentTrackIndex: 0,
+        isPlaying: false,
+        activePage: 'home-screen',
+    };
+
+    // --- REFERÊNCIAS DO DOM ---
+    const DOM = {
+        root: document.documentElement,
+        container: document.querySelector('.spotify-container'),
+        musicPlayer: document.getElementById('music-player'),
+        welcomeOverlay: document.getElementById('welcome-overlay'),
+        pages: document.querySelectorAll('.page'),
+        navItems: document.querySelectorAll('.nav-item'),
+        
+        home: { screen: document.getElementById('home-screen'), nav: document.getElementById('nav-home') },
+        playlist: { 
+            screen: document.getElementById('playlist-screen'), 
+            nav: document.getElementById('nav-playlist'),
+            cover: document.getElementById('playlist-cover'),
+            titleMain: document.getElementById('playlist-title-main'),
+            titleSticky: document.getElementById('playlist-title-sticky'),
+            view: document.querySelector('.main-view-playlist'),
+            stickyBar: document.querySelector('.sticky-top-bar'),
+            playPauseBtn: document.getElementById('play-pause-btn'),
+            playIcon: document.getElementById('play-icon'),
+            pauseIcon: document.getElementById('pause-icon'),
+            nextBtn: document.getElementById('next-btn'),
+            prevBtn: document.getElementById('prev-btn'),
+        },
+        story: {
+            screen: document.getElementById('story-screen'),
+            nav: document.getElementById('nav-story'),
+            container: document.getElementById('timeline-container'),
+        },
+        reasons: {
+            screen: document.getElementById('reasons-screen'),
+            container: document.getElementById('reasons-container'),
+        },
+        message: {
+            overlay: document.getElementById('message-overlay'),
+            openBtn: document.getElementById('open-message-card'),
+            closeBtn: document.getElementById('message-close-btn'),
+        },
+        nowPlaying: {
+            bar: document.getElementById('now-playing-bar'),
+            cover: document.getElementById('now-playing-cover'),
+            title: document.getElementById('now-playing-title'),
+            artist: document.getElementById('now-playing-artist'),
+            playPauseBtn: document.getElementById('now-playing-play-pause'),
+            playPauseIcon: document.querySelector('#now-playing-play-pause i'),
+            progressContainer: document.getElementById('progress-container'),
+            progressBar: document.getElementById('progress-bar'),
+            nextBtn: document.getElementById('now-playing-next'),
+            prevBtn: document.getElementById('now-playing-prev'),
+        },
+        links: {
+            goToPlaylist: document.getElementById('go-to-playlist'),
+            goToReasons: document.getElementById('go-to-reasons'),
+            goToStory: document.getElementById('go-to-story'),
+            backArrow: document.querySelector('.back-arrow'),
+        }
+    };
+
+    const colorThief = new ColorThief();
+
+    // --- MÓDULO DE UI (INTERFACE) ---
+    const UI = {
+        showPage(pageId) {
+            state.activePage = pageId;
+            DOM.pages.forEach(page => page.classList.toggle('active', page.id === pageId));
+            DOM.navItems.forEach(item => item.classList.remove('active'));
+            
+            const navMap = {
+                'home-screen': DOM.home.nav,
+                'playlist-screen': DOM.playlist.nav,
+                'story-screen': DOM.story.nav,
+                'reasons-screen': DOM.home.nav,
+            };
+            if (navMap[pageId]) navMap[pageId].classList.add('active');
+            
+            const activePageElement = document.getElementById(pageId);
+            if(activePageElement) {
+                const mainView = activePageElement.querySelector('.main-view, .main-view-playlist');
+                if(mainView) mainView.scrollTop = 0;
+            }
+        },
+        updateGradient(imageElement) {
+            const apply = () => {
+                try {
+                    const color = colorThief.getColor(imageElement);
+                    DOM.root.style.setProperty('--dominant-color-rgb', color.join(', '));
+                } catch (e) {
+                    console.error("ColorThief Error:", e);
+                    DOM.root.style.setProperty('--dominant-color-rgb', '85, 85, 85');
+                }
+            };
+            if (!imageElement.complete) {
+                imageElement.addEventListener('load', apply, { once: true });
+            } else {
+                apply();
+            }
+        },
+        handlePlaylistScroll() {
+            const scrollY = DOM.playlist.view.scrollTop;
+            const opacity = Math.min(scrollY / 150, 1);
+            DOM.playlist.stickyBar.style.backgroundColor = `rgba(var(--dominant-color-rgb), ${opacity})`;
+            DOM.playlist.titleSticky.style.opacity = Math.max(0, (scrollY - 200) / 50);
+            DOM.playlist.titleMain.style.opacity = Math.max(0, 1 - (scrollY / 150));
+            DOM.playlist.cover.style.transform = `translateY(${scrollY * 0.3}px)`;
+        },
+        togglePlayPauseIcons(isPlaying) {
+            DOM.playlist.playIcon.style.display = isPlaying ? 'none' : 'block';
+            DOM.playlist.pauseIcon.style.display = isPlaying ? 'block' : 'none';
+            DOM.nowPlaying.playPauseIcon.classList.toggle('fa-play', !isPlaying);
+            DOM.nowPlaying.playPauseIcon.classList.toggle('fa-pause', isPlaying);
+        },
+        updateNowPlayingBar(track) {
+            DOM.nowPlaying.bar.classList.add('visible');
+            DOM.nowPlaying.cover.src = track.cover;
+            DOM.nowPlaying.title.textContent = track.title;
+            DOM.nowPlaying.artist.textContent = track.artist;
+        },
+        updateProgressBar() {
+            if (DOM.musicPlayer.duration) {
+                const percentage = (DOM.musicPlayer.currentTime / DOM.musicPlayer.duration) * 100;
+                DOM.nowPlaying.progressBar.style.width = `${percentage}%`;
+            }
+        },
+        renderTimeline() {
+             DB.story.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'timeline-item';
+                div.innerHTML = `
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">${item.date}</div>
+                    <div class="timeline-content">
+                        <h3>${item.title}</h3>
+                        <p>${item.text}</p>
+                        <img src="${item.image}" alt="${item.title}">
+                    </div>`;
+                DOM.story.container.appendChild(div);
+            });
+        },
+        renderReasons() {
+            DB.reasons.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'reason-card';
+                card.innerHTML = `
+                    <div class="reason-card-inner">
+                        <div class="reason-card-front">
+                            <strong>${item.title}</strong>
+                            <i class="fas fa-redo-alt"></i>
+                        </div>
+                        <div class="reason-card-back">
+                            <span>${item.text}</span>
+                        </div>
+                    </div>`;
+                DOM.reasons.container.appendChild(card);
+            });
+        },
+        toggleMessage(show = true) {
+            if (show) {
+                Player.pause();
+                DOM.message.overlay.classList.add('active');
+            } else {
+                DOM.message.overlay.classList.remove('active');
+            }
+        },
+        showWelcome() {
+            setTimeout(() => {
+                DOM.welcomeOverlay.style.opacity = '0';
+                DOM.welcomeOverlay.style.pointerEvents = 'none';
+
+                state.currentTrackIndex = 0;
+                Player.play();
+
+                setInterval(UI.createHeart, 300);
+            }, 3500);
+        },
+        createHeart() {
+              const heart = document.createElement('div');
+              heart.className = 'heart-particle';
+              heart.innerHTML = '<i class="fas fa-heart"></i>';
+              heart.style.left = `${Math.random() * 100}%`;
+              heart.style.animationDuration = `${(Math.random() * 2) + 3}s`;
+              heart.style.fontSize = `${(Math.random() * 0.5) + 0.5}rem`;
+              DOM.container.appendChild(heart);
+              setTimeout(() => {
+                   heart.remove();
+              }, 5000);
+        }
+    };
+
+    // --- MÓDULO DO PLAYER ---
+    const Player = {
+        playCurrentTrack() {
+            const track = DB.music[state.currentTrackIndex];
+            DOM.musicPlayer.src = track.file;
+            DOM.musicPlayer.play().catch(e => console.error("Playback error:", e));
+            UI.updateNowPlayingBar(track);
+        },
+        play() {
+            if (!DOM.musicPlayer.src) {
+                this.playCurrentTrack();
+            } else {
+                DOM.musicPlayer.play().catch(e => console.error("Playback error:", e));
+            }
+        },
+        pause() {
+            DOM.musicPlayer.pause();
+        },
+        togglePlay() {
+            state.isPlaying ? this.pause() : this.play();
+        },
+        playNext() {
+            state.currentTrackIndex = (state.currentTrackIndex + 1) % DB.music.length;
+            this.playCurrentTrack();
+        },
+        playPrev() {
+            state.currentTrackIndex = (state.currentTrackIndex - 1 + DB.music.length) % DB.music.length;
+            this.playCurrentTrack();
+        }
+    };
+
+    // --- MÓDULO DE EVENTOS ---
+    const Events = {
+        attachAll() {
+            // Player
+            DOM.musicPlayer.addEventListener('play', () => { state.isPlaying = true; UI.togglePlayPauseIcons(true); });
+            DOM.musicPlayer.addEventListener('pause', () => { state.isPlaying = false; UI.togglePlayPauseIcons(false); });
+            DOM.musicPlayer.addEventListener('ended', () => {
+                Player.playNext();
+            });
+            DOM.musicPlayer.addEventListener('timeupdate', UI.updateProgressBar);
+            DOM.playlist.playPauseBtn.addEventListener('click', () => Player.togglePlay());
+            DOM.nowPlaying.playPauseBtn.addEventListener('click', () => Player.togglePlay());
+            
+            DOM.playlist.nextBtn.addEventListener('click', () => Player.playNext());
+            DOM.playlist.prevBtn.addEventListener('click', () => Player.playPrev());
+            DOM.nowPlaying.nextBtn.addEventListener('click', () => Player.playNext());
+            DOM.nowPlaying.prevBtn.addEventListener('click', () => Player.playPrev());
+
+            DOM.nowPlaying.progressContainer.addEventListener('click', function(e) {
+                const width = this.clientWidth;
+                const clickX = e.offsetX;
+                DOM.musicPlayer.currentTime = (clickX / width) * DOM.musicPlayer.duration;
+            });
+
+            // Navegação
+            DOM.home.nav.addEventListener('click', (e) => { e.preventDefault(); UI.showPage('home-screen'); });
+            DOM.playlist.nav.addEventListener('click', (e) => { e.preventDefault(); UI.showPage('playlist-screen'); });
+            DOM.story.nav.addEventListener('click', (e) => { e.preventDefault(); UI.showPage('story-screen'); });
+            DOM.links.backArrow.addEventListener('click', (e) => { e.preventDefault(); UI.showPage('home-screen'); });
+
+            // Links da Home
+            DOM.links.goToPlaylist.addEventListener('click', (e) => { e.preventDefault(); UI.showPage('playlist-screen'); });
+            DOM.links.goToReasons.addEventListener('click', (e) => { e.preventDefault(); UI.showPage('reasons-screen'); });
+            DOM.links.goToStory.addEventListener('click', (e) => { e.preventDefault(); UI.showPage('story-screen'); });
+
+            // Mensagem Especial
+            DOM.message.openBtn.addEventListener('click', (e) => { e.preventDefault(); UI.toggleMessage(true); });
+            DOM.message.closeBtn.addEventListener('click', () => UI.toggleMessage(false));
+            DOM.message.overlay.addEventListener('click', (e) => { if (e.target === DOM.message.overlay) UI.toggleMessage(false); });
+
+            // Scroll da Playlist
+            DOM.playlist.view.addEventListener('scroll', UI.handlePlaylistScroll);
+        },
+        init() {
+            UI.showWelcome();
+            this.attachAll();
+            UI.renderTimeline();
+            UI.renderReasons();
+            UI.updateGradient(DOM.playlist.cover);
+            UI.togglePlayPauseIcons(false);
+        }
+    };
+
+    // --- INICIALIZAÇÃO ---
+    Events.init();
+});
+</script>
+
+</body>
+</html>
